@@ -16,6 +16,12 @@ impl Timestamp {
     }
 }
 
+impl From<Timestamp> for pgp::types::Timestamp {
+    fn from(t: Timestamp) -> Self {
+        Self::from_secs(t.0)
+    }
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum TimestampError {
     Underflow,

@@ -41,11 +41,11 @@ num-derive = "0.4"
 num = "0.4"
 enum-primitive-derive = "0.3"
 enum-display-derive = "0.1"
-digest = "0.10"
-sha3 = "0.10"
-sha2 = "0.10"
-md-5 = "0.10"
-sha1 = "0.10"
+digest = "0.11.0-rc.3"
+md-5 = "0.11.0-rc.3"
+sha1 = "0.11.0-rc.3"
+sha2 = "0.11.0-rc.3"
+sha3 = "0.11.0-rc.3"
 pgp = { version = "0.18", optional = true }
 chrono = { version = "0.4", optional = true }
 log = "0.4"
@@ -85,3 +85,18 @@ signature-meta = []
 test-with-podman = ["signature-pgp"]
 
 zstdmt = ["zstd-compression", "zstd/zstdmt"]
+
+[patch.crates-io]
+pgp = { git = "https://github.com/baloo/rpgp.git", branch = "baloo/bump/2025-12-02" }
+
+camellia = { git = "https://github.com/RustCrypto/block-ciphers.git" }
+cast5    = { git = "https://github.com/RustCrypto/block-ciphers.git" }
+idea     = { git = "https://github.com/RustCrypto/block-ciphers.git" }
+twofish  = { git = "https://github.com/RustCrypto/block-ciphers.git" }
+
+ed448-goldilocks = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
+x448             = { git = "https://github.com/RustCrypto/elliptic-curves.git" }
+
+sha1-checked = { git = "https://github.com/RustCrypto/hashes.git" }
+
+rand_core = { git = "https://github.com/rust-random/rand_core.git" }
