@@ -1,18 +1,19 @@
-use super::{AlgorithmType, traits};
-use crate::Timestamp;
+use super::{traits, AlgorithmType};
 use crate::errors::Error;
+use crate::Timestamp;
+use zeroize::Zeroizing;
 
 use std::io;
 
+use pgp::composed::{SignedPublicKey, SignedSecretKey};
 use pgp::crypto::hash::HashAlgorithm;
 use pgp::crypto::public_key::PublicKeyAlgorithm;
-use pgp::packet::{SignatureConfig, SignatureType, Subpacket, SubpacketData};
+use pgp::packet::{PacketTrait, SignatureConfig, SignatureType, Subpacket, SubpacketData};
 use pgp::{
     self,
     composed::Deserializable,
-    types::{PublicKeyTrait, SecretKeyTrait},
+    types::{KeyDetails, Password, PublicKeyTrait, SecretKeyTrait},
 };
-use pgp::{SignedPublicKey, SignedSecretKey};
 
 /// Signer implementation using the `pgp` crate.
 ///
@@ -56,21 +57,21 @@ where
         let mut sig_cfg = SignatureConfig::v4(
             SignatureType::Binary,
             self.algorithm().into(),
-            HashAlgorithm::SHA2_256,
+            HashAlgorithm::Sha256,
         );
         sig_cfg
             .hashed_subpackets
-            .push(Subpacket::regular(SubpacketData::SignatureCreationTime(t)));
+            .push(Subpacket::regular(SubpacketData::SignatureCreationTime(t))?);
         sig_cfg
             .hashed_subpackets
             .push(Subpacket::regular(SubpacketData::Issuer(
                 self.secret_key.key_id(),
-            )));
+            ))?);
         sig_cfg
             .hashed_subpackets
             .push(Subpacket::regular(SubpacketData::IssuerFingerprint(
                 self.secret_key.fingerprint(),
-            )));
+            ))?);
         // sig_cfg
         //     .hashed_subpackets
         //     .push(Subpacket::regular(SubpacketData::SignersUserID(
@@ -78,14 +79,19 @@ where
         //         "none".into(),
         //     )));
 
-        let passwd_fn = || self.key_passphrase.clone().unwrap_or_default();
+        let pw = self.key_passphrase.clone().unwrap_or_default();
+        let passwd = Zeroizing::new(pw.into());
+
         let signature_packet = sig_cfg
-            .sign(&self.secret_key, passwd_fn, data)
+            .sign(&self.secret_key, &Password::Static(passwd), data)
             .map_err(Error::SignError)?;
 
         let mut signature_bytes = Vec::with_capacity(1024);
         let mut cursor = io::Cursor::new(&mut signature_bytes);
-        pgp::packet::write_packet(&mut cursor, &signature_packet).map_err(Error::SignError)?;
+        signature_packet
+            .to_writer_with_header(&mut cursor)
+            // pgp::packet::write_packet(&mut cursor, &signature_packet)
+            .map_err(Error::SignError)?;
 
         Ok(signature_bytes)
     }
@@ -290,7 +296,7 @@ impl Verifier {
 #[cfg(test)]
 pub(crate) mod test {
 
-    use super::super::{Signing, Verifying, echo_signature};
+    use super::super::{echo_signature, Signing, Verifying};
     use super::*;
     use hex_literal::hex;
 
@@ -351,8 +357,8 @@ pub(crate) mod test {
     #[test]
     fn verify_pgp_crate() {
         use chrono::{TimeZone, Utc};
-        use pgp::Signature;
         use pgp::types::{PublicKeyTrait, SecretKeyTrait};
+        use pgp::Signature;
 
         const RPM_SHA2_256: [u8; 32] =
             hex!("d92bfe276e311a67fe128768c5df4d06fd461e043afdf872ba4c679d860db81e");
