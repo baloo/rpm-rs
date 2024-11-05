@@ -1,6 +1,7 @@
 use super::{AlgorithmType, traits};
 use crate::Timestamp;
 use crate::errors::Error;
+use zeroize::Zeroizing;
 
 use std::io;
 use zeroize::Zeroizing;
