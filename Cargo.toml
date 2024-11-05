@@ -41,11 +41,11 @@ num-derive = "0.4"
 num = "0.4"
 enum-primitive-derive = "0.3"
 enum-display-derive = "0.1"
-digest = "0.10"
-sha3 = "0.10"
-sha2 = "0.10"
-md-5 = "0.10"
-sha1 = "0.10"
+digest = "0.11.0-rc.1"
+md-5 = "0.11.0-rc.2"
+sha1 = "0.11.0-rc.2"
+sha2 = "0.11.0-rc.2"
+sha3 = "0.11.0-rc.2"
 pgp = { version = "0.16", optional = true }
 chrono = { version = "0.4", optional = true }
 log = "0.4"
@@ -85,3 +85,18 @@ signature-meta = []
 test-with-podman = ["signature-pgp"]
 
 zstdmt = ["zstd-compression", "zstd/zstdmt"]
+
+[patch.crates-io]
+sha1-checked = { git = "https://github.com/RustCrypto/hashes.git" }
+
+eax         = { git = "https://github.com/RustCrypto/AEADs.git" }
+ocb3        = { git = "https://github.com/RustCrypto/AEADs.git" }
+
+pgp = { git = "https://github.com/baloo/rpgp.git", branch = "baloo/dependencies-2025-09-09" }
+
+camellia = { git = "https://github.com/RustCrypto/block-ciphers.git" }
+cast5    = { git = "https://github.com/RustCrypto/block-ciphers.git" }
+idea     = { git = "https://github.com/RustCrypto/block-ciphers.git" }
+twofish  = { git = "https://github.com/RustCrypto/block-ciphers.git" }
+
+dsa = { git = "https://github.com/RustCrypto/signatures.git" }
